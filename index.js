@@ -16,10 +16,10 @@ addEventListener("fetch", (event) => {
  * @param {Request} request
  */
 async function handleRequest(request) {
-  const variantsUrl =
+  const variantsApiUrl =
     "https://cfw-takehome.developers.workers.dev/api/variants";
 
-  const urls = await getUrls(variantsUrl);
+  const urls = await getVariantUrls(variantsApiUrl);
 
   const randomUrl = getRandomItem(urls);
 
@@ -27,17 +27,31 @@ async function handleRequest(request) {
   return response;
 }
 
-async function getUrls(variantsUrl) {
+/**
+ * Consumes a url string, and returns an array of url strings.
+ * @param {string} variantsUrl The url of the variants api.
+ */
+async function getVariantUrls(variantsUrl) {
   const responseJson = await (await fetch(variantsUrl)).json();
   const variants = responseJson.variants;
   return variants;
 }
 
+/**
+ * Returns an item from an array, selected at random.
+ * @param {Array} array
+ */
 function getRandomItem(array) {
   const index = getRandomIntInclusive(0, Array(array).length);
   return array[index];
 }
 
+/**
+ * Returns a random number between a min and max, inclusive.
+ * Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ * @param {number} min The minimum range
+ * @param {number} max The maximum range
+ */
 function getRandomIntInclusive(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
