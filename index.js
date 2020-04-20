@@ -7,7 +7,8 @@
  *  from a randomly-chosen web page.
  */
 
-import { getVariantUrls, getRandomItem } from "./utils";
+// import { getVariantUrls, getRandomItem } from "./utils";
+// import Rewriter from "./htmlRewriter";
 
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
@@ -26,5 +27,86 @@ async function handleRequest(request) {
   const randomUrl = getRandomItem(urls);
 
   const response = await fetch(randomUrl);
-  return response;
+  const rewritten = rewriteHtml(response);
+  return rewritten;
+}
+
+/**
+ * Consumes a url string, and returns an array of url strings.
+ * @param {string} apiUrl The url of the variants api.
+ */
+async function getVariantUrls(apiUrl) {
+  const responseJson = await (await fetch(apiUrl)).json();
+  const variants = responseJson.variants;
+  return variants;
+}
+
+/**
+ * Returns an item from an array, selected at random.
+ * @param {Array} array
+ */
+function getRandomItem(array) {
+  const index = getRandomIntInclusive(0, Array(array).length);
+  return array[index];
+}
+
+/**
+ * Returns a random number between a min and max, inclusive.
+ * Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ * @param {number} min The minimum range
+ * @param {number} max The maximum range
+ */
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
+}
+
+/**
+ * Consumes an html string and produces an altered html string.
+ * @param {string} html The html request to rewrite
+ */
+function rewriteHtml(html) {
+  let rewriter = new HTMLRewriter();
+  rewriter = rewriteTitle(rewriter);
+  rewriter = rewriteHeading(rewriter);
+  rewriter = rewriteDescription(rewriter);
+  rewriter = rewriteUrl(rewriter);
+
+  return rewriter.transform(html);
+}
+
+function rewriteTitle(rewiter) {
+  return rewiter.on("title", new TitleElementHandler());
+}
+function rewriteHeading(rewiter) {
+  return rewiter.on("h1#title", new HeadingElementHandler());
+}
+function rewriteDescription(rewiter) {
+  return rewiter.on("p#description", new DescriptionElementHandler());
+}
+function rewriteUrl(rewiter) {
+  return rewiter.on("a#url", new LinkElementHandler());
+}
+
+class TitleElementHandler {
+  element(element) {
+    element.setInnerContent("Hello World!");
+  }
+}
+class HeadingElementHandler {
+  element(element) {
+    element.setInnerContent("Hello!");
+  }
+}
+class DescriptionElementHandler {
+  element(element) {
+    element.setInnerContent("Happy hacking.");
+  }
+}
+class LinkElementHandler {
+  element(element) {
+    element.setInnerContent("Check out my Github");
+    element.setAttribute("href", "https://github.com/KaiPrince");
+  }
 }
