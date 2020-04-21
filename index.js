@@ -33,24 +33,6 @@ async function handleRequest(request) {
 }
 
 /**
- * Consumes a Request object, and produces the value of the 'variant' cookie,
- * or null.
- * @param {Request} request
- */
-function getVariantCookie(request) {
-  const cookieString = request.headers.get("Cookie");
-  if (cookieString) {
-    const variantIndex = cookieString.replace(
-      /(?:(?:^|.*;\s*)variant\s*\=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    );
-    return variantIndex;
-  } else {
-    return null;
-  }
-}
-
-/**
  * Consumes a url string, and returns an array of url strings.
  * @param {string} apiUrl The url of the variants api.
  */
@@ -142,4 +124,22 @@ function addCookie(response, variant) {
     headers: headers,
   });
   return newResponse;
+}
+
+/**
+ * Consumes a Request object, and produces the value of the 'variant' cookie,
+ * or null.
+ * @param {Request} request
+ */
+function getVariantCookie(request) {
+  const cookieString = request.headers.get("Cookie");
+  if (cookieString) {
+    const variantIndex = cookieString.replace(
+      /(?:(?:^|.*;\s*)variant\s*\=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+    return variantIndex;
+  } else {
+    return null;
+  }
 }
