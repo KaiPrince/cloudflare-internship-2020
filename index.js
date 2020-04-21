@@ -24,11 +24,25 @@ async function handleRequest(request) {
 
   const urls = await getVariantUrls(variantsApiUrl);
 
-  const randomUrl = getRandomItem(urls);
+  const cookieIndex = getVariantCookie(request);
+  const urlIndex = cookieIndex || getRandomIndex(urls);
+  console.log(urlIndex);
+  const randomUrl = urls[urlIndex];
 
   const response = await fetch(randomUrl);
-  const rewritten = rewriteHtml(response);
+  const withCookie = addCookie(response, urlIndex);
+  const rewritten = rewriteHtml(withCookie);
   return rewritten;
+}
+
+function getVariantCookie(request) {
+  const cookieString = request.headers.get("Cookie");
+  if (!cookieString) return null;
+  const variantIndex = cookieString.replace(
+    /(?:(?:^|.*;\s*)variant\s*\=\s*([^;]*).*$)|^.*$/,
+    "$1"
+  );
+  return variantIndex;
 }
 
 /**
@@ -45,9 +59,9 @@ async function getVariantUrls(apiUrl) {
  * Returns an item from an array, selected at random.
  * @param {Array} array
  */
-function getRandomItem(array) {
+function getRandomIndex(array) {
   const index = getRandomIntInclusive(0, Array(array).length);
-  return array[index];
+  return index;
 }
 
 /**
@@ -109,4 +123,14 @@ class LinkElementHandler {
     element.setInnerContent("Check out my Github");
     element.setAttribute("href", "https://github.com/KaiPrince");
   }
+}
+
+function addCookie(response, variant) {
+  const newResponse = new Response(response.body, {
+    headers: new Headers({ ...response.headers }).set(
+      "Set-Cookie",
+      `variant=${variant}`
+    ),
+  });
+  return newResponse;
 }
