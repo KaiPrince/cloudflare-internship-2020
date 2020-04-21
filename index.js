@@ -35,14 +35,22 @@ async function handleRequest(request) {
   return rewritten;
 }
 
+/**
+ * Consumes a Request object, and produces the value of the 'variant' cookie,
+ * or null.
+ * @param {Request} request
+ */
 function getVariantCookie(request) {
   const cookieString = request.headers.get("Cookie");
-  if (!cookieString) return null;
-  const variantIndex = cookieString.replace(
-    /(?:(?:^|.*;\s*)variant\s*\=\s*([^;]*).*$)|^.*$/,
-    "$1"
-  );
-  return variantIndex;
+  if (cookieString) {
+    const variantIndex = cookieString.replace(
+      /(?:(?:^|.*;\s*)variant\s*\=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+    return variantIndex;
+  } else {
+    return null;
+  }
 }
 
 /**
@@ -125,6 +133,11 @@ class LinkElementHandler {
   }
 }
 
+/**
+ * Adds a cookie header to the response provided.
+ * @param {Response} response
+ * @param {number | string} variant The url index that was used.
+ */
 function addCookie(response, variant) {
   const headers = new Headers({ ...response.headers });
   headers.set("Set-Cookie", `variant=${variant}`);
