@@ -26,10 +26,10 @@ async function handleRequest(request) {
 
   const cookieIndex = getVariantCookie(request);
   const urlIndex = cookieIndex || getRandomIndex(urls);
-  console.log(urlIndex);
   const randomUrl = urls[urlIndex];
 
   const response = await fetch(randomUrl);
+
   const withCookie = addCookie(response, urlIndex);
   const rewritten = rewriteHtml(withCookie);
   return rewritten;
@@ -126,11 +126,10 @@ class LinkElementHandler {
 }
 
 function addCookie(response, variant) {
+  const headers = new Headers({ ...response.headers });
+  headers.set("Set-Cookie", `variant=${variant}`);
   const newResponse = new Response(response.body, {
-    headers: new Headers({ ...response.headers }).set(
-      "Set-Cookie",
-      `variant=${variant}`
-    ),
+    headers: headers,
   });
   return newResponse;
 }
