@@ -7,9 +7,6 @@
  *  from a randomly-chosen web page.
  */
 
-// import { getVariantUrls, getRandomItem } from "./utils";
-// import Rewriter from "./htmlRewriter";
-
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
 });
